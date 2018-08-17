@@ -1,6 +1,9 @@
 ﻿
 Imports System.Data.OleDb
+Imports Microsoft.VisualBasic.FileIO
 Imports Excel = Microsoft.Office.Interop.Excel
+Imports OfficeOpenXml
+
 
 Public Class DataImportForm
 
@@ -40,7 +43,6 @@ Public Class DataImportForm
     Private Sub InputBrowseButton_Click(sender As Object, e As EventArgs) Handles InputBrowseButton.Click
         If (InputFolderDialogue.ShowDialog() = DialogResult.OK) Then
             FolderInputBox.Text = InputFolderDialogue.SelectedPath
-            FolderOutputBox.Text = String.Concat(InputFolderDialogue.SelectedPath, "\Xlsx Files\")
         End If
     End Sub
 
@@ -61,6 +63,7 @@ Public Class DataImportForm
     Private Sub FolderInputBox_TextChanged(sender As Object, e As EventArgs) Handles FolderInputBox.TextChanged
         If IO.Directory.Exists(FolderInputBox.Text) Then
             inputdir = New IO.DirectoryInfo(FolderInputBox.Text)
+            FolderOutputBox.Text = FolderInputBox.Text & "\Xlsx Files\"
             PopulateFileList(inputdir)
         End If
     End Sub
@@ -98,7 +101,7 @@ Public Class DataImportForm
     Private Sub RemoveSingle_Click(sender As Object, e As EventArgs) Handles RemoveSingle.Click
         Dim items
         items = SelectedList.SelectedItems()
-        For Each item In items
+        For Each item In SelectedList.SelectedItems.OfType(Of String).ToList
             SelectedList.Items.Remove(item)
         Next
     End Sub
@@ -133,17 +136,18 @@ Module Arbin
         Dim normaltable As New DataTable("Normal Table")
         Dim statstable As New DataTable("Statistics Table")
         Dim outputdir As New IO.DirectoryInfo(outputpath)
-
+        Dim timeperfile As New Stopwatch
 
         For Each file In files
+            timeperfile = Stopwatch.StartNew()
             DataImportForm.TextOutput.AppendText("Pulling tables for " & file.Name & "." & vbCrLf)
 
             normaltable = GetTable(file, normaltable.TableName())
             statstable = GetTable(file, statstable.TableName())
 
             DataImportForm.TextOutput.AppendText("Exporting tables to Excel." & vbCrLf)
-            If Export.ToExcel({normaltable, statstable}, outputpath & file.Name) Then
-                DataImportForm.TextOutput.AppendText(String.Concat(file.Name, " was successfully converted!", vbCrLf))
+            If Export.ToExcel({normaltable, statstable}, outputpath & "\" & IO.Path.GetFileNameWithoutExtension(file.Name) & ".xlsx") Then
+                DataImportForm.TextOutput.AppendText(String.Format("{0} was successfully converted in {1:s} s!{2}", file.Name, timeperfile.Elapsed, vbCrLf))
             End If
         Next
     End Sub
@@ -154,16 +158,16 @@ Module Arbin
         Dim con As New OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" & file.FullName)
         Dim command As New OleDbCommand
         Dim da As New OleDbDataAdapter
-        Dim table As New DataTable(tablename)
+        Dim dt As New DataTable(tablename)
 
         command.Connection = con
         command.CommandText = SQLString(tablename)
         da = New OleDbDataAdapter(command)
         con.Open()
-        da.Fill(table)
+        da.Fill(dt)
         con.Close()
 
-        GetTable = table
+        GetTable = dt
     End Function
 
     Private Function SQLString(Optional ByVal type As String = "Normal")
@@ -189,56 +193,21 @@ End Module
 
 Module Export
     Public Function ToExcel(ByVal tables() As DataTable, ByVal filepath As String) As Boolean
-        Dim xl As New Excel.Application
-        Dim wbook As Excel.Workbook
-        Dim wsheet As Excel.Worksheet
         Dim dt As DataTable
-        Dim dc As DataColumn
-        Dim dr As DataRow
-        Dim colIndex As Integer = 0
-        Dim rowIndex As Integer = 0
-        Dim sheetcount As Integer = xl.SheetsInNewWorkbook
+        Dim ws As ExcelWorksheet
+        Dim file As New IO.FileInfo(filepath)
 
-
-        xl.SheetsInNewWorkbook = 1
-        wbook = xl.Workbooks.Add()
-        wsheet = wbook.Worksheets(1)
-
-
-
-        For Each table In tables
-            wsheet.Name = table.TableName
-
-            dt = table
-
-            For Each dc In dt.Columns
-                colIndex = colIndex + 1
-                wsheet.Cells(1, colIndex) = dc.ColumnName
+        Using pck = New ExcelPackage
+            For Each dt In tables
+                ws = pck.Workbook.Worksheets.Add(dt.TableName)
+                ws.Cells("A1").LoadFromDataTable(dt, True)
             Next
+            pck.SaveAs(file)
+        End Using
 
-            For Each dr In dt.Rows
-                rowIndex = rowIndex + 1
-                colIndex = 0
-                For Each dc In dt.Columns
-                    colIndex = colIndex + 1
-                    wsheet.Cells(rowIndex + 1, colIndex) = dr(dc.ColumnName)
-                Next
-            Next
+        Return True
 
-            wsheet.Columns.AutoFit()
-            wsheet = wbook.Worksheets.Add()
-        Next
-
-        wbook.SaveAs(filepath)
-        xl.SheetsInNewWorkbook = sheetcount
-        xl.DisplayAlerts = False
-        If wsheet IsNot Nothing Then If ReleaseObject(wsheet) Then wbook.Close(False)
-        If ReleaseObject(wbook) Then xl.Quit()
-        If ReleaseObject(xl) Then GC.Collect()
-
-        ToExcel = True
     End Function
-
     Private Function ReleaseObject(ByVal o As Object) As Boolean
         Try
             While (System.Runtime.InteropServices.Marshal.ReleaseComObject(o) > 0)
