@@ -1,9 +1,9 @@
-﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
+﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
 Partial Class DataImportForm
     Inherits System.Windows.Forms.Form
 
     'Form overrides dispose to clean up the component list.
-    <System.Diagnostics.DebuggerNonUserCode()> _
+    <System.Diagnostics.DebuggerNonUserCode()>
     Protected Overrides Sub Dispose(ByVal disposing As Boolean)
         Try
             If disposing AndAlso components IsNot Nothing Then
@@ -20,7 +20,7 @@ Partial Class DataImportForm
     'NOTE: The following procedure is required by the Windows Form Designer
     'It can be modified using the Windows Form Designer.  
     'Do not modify it using the code editor.
-    <System.Diagnostics.DebuggerStepThrough()> _
+    <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(DataImportForm))
         Me.MinLabel = New System.Windows.Forms.Label()
@@ -42,7 +42,7 @@ Partial Class DataImportForm
         Me.Label8 = New System.Windows.Forms.Label()
         Me.OutputBrowseButton = New System.Windows.Forms.Button()
         Me.FolderOutputBox = New System.Windows.Forms.TextBox()
-        Me.Label9 = New System.Windows.Forms.Label()
+        Me.ConvertButton = New System.Windows.Forms.Label()
         Me.InputFolderDialogue = New System.Windows.Forms.FolderBrowserDialog()
         Me.OutputFolderDialogue = New System.Windows.Forms.FolderBrowserDialog()
         Me.Label5 = New System.Windows.Forms.Label()
@@ -105,6 +105,7 @@ Partial Class DataImportForm
         Me.FileList.Name = "FileList"
         Me.FileList.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended
         Me.FileList.Size = New System.Drawing.Size(225, 238)
+        Me.FileList.Sorted = True
         Me.FileList.TabIndex = 4
         Me.FileList.TabStop = False
         '
@@ -263,17 +264,17 @@ Partial Class DataImportForm
         Me.FolderOutputBox.Size = New System.Drawing.Size(390, 22)
         Me.FolderOutputBox.TabIndex = 3
         '
-        'Label9
+        'ConvertButton
         '
-        Me.Label9.BackColor = System.Drawing.Color.Gray
-        Me.Label9.Font = New System.Drawing.Font("Tahoma", 20.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Label9.ForeColor = System.Drawing.Color.Blue
-        Me.Label9.Location = New System.Drawing.Point(200, 500)
-        Me.Label9.Name = "Label9"
-        Me.Label9.Size = New System.Drawing.Size(200, 35)
-        Me.Label9.TabIndex = 21
-        Me.Label9.Text = "Convert Data"
-        Me.Label9.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
+        Me.ConvertButton.BackColor = System.Drawing.Color.Gray
+        Me.ConvertButton.Font = New System.Drawing.Font("Tahoma", 20.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.ConvertButton.ForeColor = System.Drawing.Color.Blue
+        Me.ConvertButton.Location = New System.Drawing.Point(200, 500)
+        Me.ConvertButton.Name = "ConvertButton"
+        Me.ConvertButton.Size = New System.Drawing.Size(200, 35)
+        Me.ConvertButton.TabIndex = 21
+        Me.ConvertButton.Text = "Convert Data"
+        Me.ConvertButton.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
         '
         'InputFolderDialogue
         '
@@ -313,7 +314,7 @@ Partial Class DataImportForm
         Me.BackColor = System.Drawing.Color.FromArgb(CType(CType(50, Byte), Integer), CType(CType(50, Byte), Integer), CType(CType(50, Byte), Integer))
         Me.ClientSize = New System.Drawing.Size(600, 700)
         Me.Controls.Add(Me.PictureBox1)
-        Me.Controls.Add(Me.Label9)
+        Me.Controls.Add(Me.ConvertButton)
         Me.Controls.Add(Me.FolderOutputBox)
         Me.Controls.Add(Me.OutputBrowseButton)
         Me.Controls.Add(Me.Label8)
@@ -363,7 +364,7 @@ Partial Class DataImportForm
     Friend WithEvents Label8 As Label
     Friend WithEvents OutputBrowseButton As Button
     Friend WithEvents FolderOutputBox As TextBox
-    Friend WithEvents Label9 As Label
+    Friend WithEvents ConvertButton As Label
     Friend WithEvents InputFolderDialogue As FolderBrowserDialog
     Friend WithEvents OutputFolderDialogue As FolderBrowserDialog
     Friend WithEvents Label5 As Label
