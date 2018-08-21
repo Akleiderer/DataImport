@@ -171,7 +171,7 @@ Module Arbin
 
             DataImportForm.WriteLine("Exporting to Excel.")
             If Export.ToExcel(ds, outputpath & "\" & IO.Path.GetFileNameWithoutExtension(file.Name) & ".xlsx") Then
-                DataImportForm.WriteLine(String.Format("{0} was successfully converted in {1:%s} s!", file.Name, timeperfile.Elapsed))
+                DataImportForm.WriteLine(String.Format("{0} was successfully converted in {1} s!", file.Name, timeperfile.ElapsedMilliseconds / 1000))
             End If
         Next
     End Sub
