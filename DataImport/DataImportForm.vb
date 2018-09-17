@@ -6,7 +6,6 @@ Imports OfficeOpenXml
 
 
 Public Class DataImportForm
-
     Protected drag As Boolean
     Protected mousex As Integer
     Protected mousey As Integer
@@ -50,19 +49,16 @@ Public Class DataImportForm
             Top = Cursor.Position.Y - mousey
             Left = Cursor.Position.X - mousex
         End If
-
     End Sub
     Private Sub DataImportForm_MouseDown(sender As Object, e As EventArgs) Handles MyBase.MouseDown
         ' Sets drag to true and stores mouse position
         drag = True
         mousex = Cursor.Position.X - Left
         mousey = Cursor.Position.Y - Top
-
     End Sub
     Private Sub DataImportForm_MouseUp(sender As Object, e As EventArgs) Handles MyBase.MouseUp
         ' Sets drag to false
         drag = False
-
     End Sub
 
     Private Sub InputBrowseButton_Click(sender As Object, e As EventArgs) Handles InputBrowseButton.Click
@@ -139,22 +135,17 @@ Public Class DataImportForm
                     ArbinFiles.Add(tempfiles(filename))
                 End If
             Next
-
             WriteLine("Converting files:")
             For Each file In ArbinFiles
                 TextOutput.AppendText(String.Concat(file.Name, vbCrLf))
             Next
-
             Arbin.Convert(ArbinFiles, FolderOutputBox.Text)
         Else
             MsgBox("Output file path is not valid.")
             WriteLine("Invalid output directory.")
-
         End If
-
         WriteLine("Conversion completed!")
     End Sub
-
 End Class
 
 Module Arbin
@@ -181,8 +172,6 @@ Module Arbin
         Dim Tables As New Dictionary(Of String, Dictionary(Of String, Type))
         Dim normalcols As New Dictionary(Of String, Type)
         Dim statcols As New Dictionary(Of String, Type)
-
-
 
         With normalcols
             .Add("Test_ID", GetType(Int32))
@@ -226,10 +215,7 @@ Module Arbin
 
         ' Fill DataSet from file
         FillDataSet(file, ds)
-
         Return ds
-
-
     End Function
 
     <CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2100:Review SQL queries for security vulnerabilities")>
@@ -237,7 +223,6 @@ Module Arbin
         Dim con As New OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" & file.FullName)
         Dim command As New OleDbCommand
         Dim da As New OleDbDataAdapter
-
 
         command.Connection = con
         con.Open()
@@ -247,6 +232,8 @@ Module Arbin
             da.Fill(dt)
         Next
         con.Close()
+
+        Return True
     End Function
 
     Private Function SQLString(Optional ByVal type As String = "Normal")
@@ -278,12 +265,10 @@ Module Export
         Dim file As New FileInfo(filepath)
         Dim colnumber As Int32
 
-
         Using pck = New ExcelPackage
             For Each dt In ds.Tables()
                 ws = pck.Workbook.Worksheets.Add(dt.TableName)
                 ws.Cells("A1").LoadFromDataTable(dt, True)
-
                 colnumber = 1
                 For Each col In dt.Columns
                     ws.Cells(1, colnumber).Value = ws.Cells(1, colnumber).Value.Replace("_", " ")
@@ -331,8 +316,6 @@ Module Export
             Return False
         End If
 
-
-
         ' Determines if the directory exists and tries to create
         If Not isfile Then
             ' Determines if there are bad characters in the name.
@@ -341,7 +324,6 @@ Module Export
                     Return False
                 End If
             Next
-
             di = New DirectoryInfo(name)
             If Not di.Exists() Then
                 If createnew Then
@@ -356,7 +338,6 @@ Module Export
                     Return False
                 End If
             End If
-
             ' Determines if file is read-only
             If Not readonlyvalid Then
                 If di.Attributes.HasFlag(FileAttributes.ReadOnly) Then
@@ -373,9 +354,6 @@ Module Export
                 End If
             End If
         End If
-
-
-
         ' The name passes basic validation.
         Return True
     End Function
