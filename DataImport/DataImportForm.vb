@@ -347,7 +347,8 @@ Module Export
                 If createnew Then
                     Try
                         di.Create()
-                        di.Attributes &= FileAttributes.Normal
+                        di.Refresh()
+                        di.Attributes = di.Attributes Or FileAttributes.Normal
                     Catch
                         Return False
                     End Try
