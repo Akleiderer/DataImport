@@ -36,8 +36,6 @@ Partial Class DataImportForm
         Me.RemoveAll = New System.Windows.Forms.Label()
         Me.Label6 = New System.Windows.Forms.Label()
         Me.InputBrowseButton = New System.Windows.Forms.Button()
-        Me.VScrollBar1 = New System.Windows.Forms.VScrollBar()
-        Me.VScrollBar2 = New System.Windows.Forms.VScrollBar()
         Me.Label7 = New System.Windows.Forms.Label()
         Me.Label8 = New System.Windows.Forms.Label()
         Me.OutputBrowseButton = New System.Windows.Forms.Button()
@@ -208,20 +206,6 @@ Partial Class DataImportForm
         Me.InputBrowseButton.Text = "Browse"
         Me.InputBrowseButton.UseVisualStyleBackColor = True
         '
-        'VScrollBar1
-        '
-        Me.VScrollBar1.Location = New System.Drawing.Point(263, 180)
-        Me.VScrollBar1.Name = "VScrollBar1"
-        Me.VScrollBar1.Size = New System.Drawing.Size(12, 238)
-        Me.VScrollBar1.TabIndex = 15
-        '
-        'VScrollBar2
-        '
-        Me.VScrollBar2.Location = New System.Drawing.Point(538, 180)
-        Me.VScrollBar2.Name = "VScrollBar2"
-        Me.VScrollBar2.Size = New System.Drawing.Size(12, 238)
-        Me.VScrollBar2.TabIndex = 16
-        '
         'Label7
         '
         Me.Label7.Font = New System.Drawing.Font("Tahoma", 12.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
@@ -319,8 +303,6 @@ Partial Class DataImportForm
         Me.Controls.Add(Me.OutputBrowseButton)
         Me.Controls.Add(Me.Label8)
         Me.Controls.Add(Me.Label7)
-        Me.Controls.Add(Me.VScrollBar2)
-        Me.Controls.Add(Me.VScrollBar1)
         Me.Controls.Add(Me.InputBrowseButton)
         Me.Controls.Add(Me.Label6)
         Me.Controls.Add(Me.Label5)
@@ -358,8 +340,6 @@ Partial Class DataImportForm
     Friend WithEvents RemoveAll As Label
     Friend WithEvents Label6 As Label
     Friend WithEvents InputBrowseButton As Button
-    Friend WithEvents VScrollBar1 As VScrollBar
-    Friend WithEvents VScrollBar2 As VScrollBar
     Friend WithEvents Label7 As Label
     Friend WithEvents Label8 As Label
     Friend WithEvents OutputBrowseButton As Button
