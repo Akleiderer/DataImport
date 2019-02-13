@@ -2,6 +2,7 @@
 Imports System.ComponentModel
 Imports System.Data.OleDb
 Imports System.IO
+Imports System.Reflection
 Imports Microsoft.VisualBasic.FileIO
 Imports OfficeOpenXml
 Imports Squirrel
@@ -58,6 +59,9 @@ Public Class DataImportForm
 
     Private Async Sub DataImportForm_LoadAsync(sender As Object, e As EventArgs) Handles Me.Load
         ValidExts = {".res", ".mdb", ".par"}
+
+        textVersionNumber.Text = "Version " & Assembly.GetExecutingAssembly().GetName().Version.ToString()
+
         Using mgr = New UpdateManager("G:\Global\Transfer\Internal\akleiderer\Releases")
             Await mgr.UpdateApp()
         End Using

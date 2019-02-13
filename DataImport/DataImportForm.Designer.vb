@@ -45,7 +45,7 @@ Partial Class DataImportForm
         Me.OutputFolderDialogue = New System.Windows.Forms.FolderBrowserDialog()
         Me.Label5 = New System.Windows.Forms.Label()
         Me.PictureBox1 = New System.Windows.Forms.PictureBox()
-        Me.TextBox1 = New System.Windows.Forms.TextBox()
+        Me.textVersionNumber = New System.Windows.Forms.TextBox()
         Me.BackgroundWorker1 = New System.ComponentModel.BackgroundWorker()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
@@ -80,6 +80,7 @@ Partial Class DataImportForm
         '
         'Title
         '
+        Me.Title.BackColor = System.Drawing.Color.FromArgb(CType(CType(50, Byte), Integer), CType(CType(50, Byte), Integer), CType(CType(50, Byte), Integer))
         Me.Title.Cursor = System.Windows.Forms.Cursors.Arrow
         Me.Title.Font = New System.Drawing.Font("Arial", 26.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.Title.ForeColor = System.Drawing.Color.White
@@ -285,6 +286,7 @@ Partial Class DataImportForm
         '
         Me.PictureBox1.BackgroundImage = CType(resources.GetObject("PictureBox1.BackgroundImage"), System.Drawing.Image)
         Me.PictureBox1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom
+        Me.PictureBox1.Enabled = False
         Me.PictureBox1.ErrorImage = Nothing
         Me.PictureBox1.InitialImage = Nothing
         Me.PictureBox1.Location = New System.Drawing.Point(50, 10)
@@ -293,14 +295,17 @@ Partial Class DataImportForm
         Me.PictureBox1.TabIndex = 22
         Me.PictureBox1.TabStop = False
         '
-        'TextBox1
+        'textVersionNumber
         '
-        Me.TextBox1.BackColor = System.Drawing.Color.Silver
-        Me.TextBox1.Location = New System.Drawing.Point(548, 683)
-        Me.TextBox1.Name = "TextBox1"
-        Me.TextBox1.Size = New System.Drawing.Size(52, 20)
-        Me.TextBox1.TabIndex = 23
-        Me.TextBox1.Text = "v. 1.0.5"
+        Me.textVersionNumber.BackColor = System.Drawing.Color.FromArgb(CType(CType(50, Byte), Integer), CType(CType(50, Byte), Integer), CType(CType(50, Byte), Integer))
+        Me.textVersionNumber.BorderStyle = System.Windows.Forms.BorderStyle.None
+        Me.textVersionNumber.ForeColor = System.Drawing.SystemColors.ControlLight
+        Me.textVersionNumber.Location = New System.Drawing.Point(12, 683)
+        Me.textVersionNumber.Name = "textVersionNumber"
+        Me.textVersionNumber.ReadOnly = True
+        Me.textVersionNumber.Size = New System.Drawing.Size(150, 13)
+        Me.textVersionNumber.TabIndex = 23
+        Me.textVersionNumber.Text = "version 1.0.5"
         '
         'BackgroundWorker1
         '
@@ -312,7 +317,7 @@ Partial Class DataImportForm
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = System.Drawing.Color.FromArgb(CType(CType(50, Byte), Integer), CType(CType(50, Byte), Integer), CType(CType(50, Byte), Integer))
         Me.ClientSize = New System.Drawing.Size(600, 700)
-        Me.Controls.Add(Me.TextBox1)
+        Me.Controls.Add(Me.textVersionNumber)
         Me.Controls.Add(Me.PictureBox1)
         Me.Controls.Add(Me.ConvertButton)
         Me.Controls.Add(Me.FolderOutputBox)
@@ -365,6 +370,6 @@ Partial Class DataImportForm
     Friend WithEvents OutputFolderDialogue As FolderBrowserDialog
     Friend WithEvents Label5 As Label
     Friend WithEvents PictureBox1 As PictureBox
-    Friend WithEvents TextBox1 As TextBox
+    Friend WithEvents textVersionNumber As TextBox
     Public WithEvents BackgroundWorker1 As System.ComponentModel.BackgroundWorker
 End Class
