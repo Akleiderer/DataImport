@@ -1,4 +1,5 @@
 ﻿
+Imports System.ComponentModel
 Imports System.Data.OleDb
 Imports System.IO
 Imports Microsoft.VisualBasic.FileIO
@@ -45,9 +46,6 @@ Public Class DataImportForm
         End Set
     End Property
 
-    Public Sub WriteLine(ByVal text As String)
-        TextOutput.AppendText(String.Format("[{0:hh:mm:ss tt}] ", Now()) & text & vbCrLf)
-    End Sub
 
     Protected Property ValidExts As String()
         Get
@@ -60,7 +58,7 @@ Public Class DataImportForm
 
     Private Async Sub DataImportForm_LoadAsync(sender As Object, e As EventArgs) Handles Me.Load
         ValidExts = {".res", ".mdb", ".par"}
-        Using mgr = New UpdateManager("C:\\Releases")
+        Using mgr = New UpdateManager("G:\Global\Transfer\Internal\akleiderer\Releases")
             Await mgr.UpdateApp()
         End Using
 
@@ -153,6 +151,12 @@ Public Class DataImportForm
     End Sub
 
     Private Sub ConvertButton_Click(sender As Object, e As EventArgs) Handles ConvertButton.Click
+        BackgroundWorker1.RunWorkerAsync()
+    End Sub
+
+
+    Private Sub BackgroundWorker1_DoWork(sender As Object, e As System.ComponentModel.DoWorkEventArgs) Handles BackgroundWorker1.DoWork
+        Dim i As Int32 = 0
         If IsValidFileNameOrPath(FolderOutputBox.Text) Then
             ArbinFiles.Clear()
             EISFiles.Clear()
@@ -164,68 +168,108 @@ Public Class DataImportForm
                     EISFiles.Add(tempfiles(filename))
                 End If
             Next
-            WriteLine("Converting files:")
+            BackgroundWorker1.ReportProgress(i, New String("Converting files:"))
             For Each file In ArbinFiles
-                TextOutput.AppendText(String.Concat(file.Name, vbCrLf))
+                BackgroundWorker1.ReportProgress(i, New String("- " & file.Name))
             Next
-            Arbin.Convert(ArbinFiles, FolderOutputBox.Text)
+            For Each file In ArbinFiles
+                Dim ds As New DataSet
+                Dim outputdir As New IO.DirectoryInfo(FolderOutputBox.Text)
+                Dim timeperfile As New Stopwatch
+                Dim xlsApp As Excel.Application = Nothing
+                Dim xlsWorkBooks As Excel.Workbooks = Nothing
+                Dim xlsWB As Excel.Workbook = Nothing
+
+
+                timeperfile = Stopwatch.StartNew()
+                BackgroundWorker1.ReportProgress(0, New String("Pulling tables for " & file.Name & "."))
+
+                ds = Arbin.GetDataSet(file)
+
+                BackgroundWorker1.ReportProgress(0, New String("Exporting to Excel."))
+                If Export.ToExcel(ds, FolderOutputBox.Text & "\" & IO.Path.GetFileNameWithoutExtension(file.Name) & ".xlsx") Then
+                    Try
+                        xlsApp = New Excel.Application
+                        xlsApp.Visible = False
+                        xlsWorkBooks = xlsApp.Workbooks
+                        xlsWB = xlsWorkBooks.Open(FolderOutputBox.Text & "\" & IO.Path.GetFileNameWithoutExtension(file.Name) & ".xlsx")
+
+                        ArbinFormatMain(xlsWB)
+                        xlsWB.Save()
+
+                    Catch ex As Exception
+                        MessageBox.Show(String.Format("Error: {0}", ex.Message))
+
+                    Finally
+                        xlsWB.Close()
+                        xlsWB = Nothing
+                        xlsApp.Quit()
+                        xlsApp = Nothing
+                    End Try
+                    BackgroundWorker1.ReportProgress(0, New String(String.Format("{0} was successfully converted in {1} s!", file.Name, timeperfile.ElapsedMilliseconds / 1000)))
+                End If
+
+            Next
 
             For Each file In EISFiles
-                TextOutput.AppendText(String.Concat(file.Name, vbCrLf))
+                BackgroundWorker1.ReportProgress(i, New String("- " & file.Name))
             Next
-            EIS.EISConvert(EISFiles, FolderOutputBox.Text)
+            For Each file In EISFiles
+                Dim ds As New DataSet
+                Dim outputdir As New IO.DirectoryInfo(FolderOutputBox.Text)
+                Dim timeperfile As New Stopwatch
+                Dim xlsApp As Excel.Application = Nothing
+                Dim xlsWorkBooks As Excel.Workbooks = Nothing
+                Dim xlsWB As Excel.Workbook = Nothing
+
+
+                timeperfile = Stopwatch.StartNew()
+                BackgroundWorker1.ReportProgress(0, New String("Pulling tables for " & file.Name & "."))
+
+                ds = EIS.EISGetDataSet(file)
+
+                BackgroundWorker1.ReportProgress(0, New String("Exporting to Excel."))
+                If Export.ToExcel(ds, FolderOutputBox.Text & "\" & IO.Path.GetFileNameWithoutExtension(file.Name) & "_EIS.xlsx") Then
+                    Try
+                        xlsApp = New Excel.Application
+                        xlsApp.Visible = False
+                        xlsWorkBooks = xlsApp.Workbooks
+                        xlsWB = xlsWorkBooks.Open(FolderOutputBox.Text & "\" & IO.Path.GetFileNameWithoutExtension(file.Name) & "_EIS.xlsx")
+
+                        EISFormatMain(xlsWB)
+                        xlsWB.Save()
+
+                    Catch ex As Exception
+                        MessageBox.Show(String.Format("Error: {0}", ex.Message))
+
+                    Finally
+                        xlsWB.Close()
+                        xlsWB = Nothing
+                        xlsApp.Quit()
+                        xlsApp = Nothing
+                    End Try
+                    BackgroundWorker1.ReportProgress(0, New String(String.Format("{0} was successfully converted in {1} s!", file.Name, timeperfile.ElapsedMilliseconds / 1000)))
+                End If
+
+            Next
+
         Else
             MsgBox("Output file path is not valid.")
-            WriteLine("Invalid output directory.")
+            BackgroundWorker1.ReportProgress(i, New String("Invalid output directory."))
         End If
-        WriteLine("Conversion completed!")
+        BackgroundWorker1.ReportProgress(i, New String("Conversion completed!"))
+    End Sub
+
+    Public Sub BackgroundWorker1_ProgressChanged(sender As Object, e As ProgressChangedEventArgs) Handles BackgroundWorker1.ProgressChanged
+        TextOutput.AppendText(String.Format("[{0:hh:mm:ss tt}] ", Now()) & e.UserState & vbCrLf)
     End Sub
 
 
 End Class
 
 Module Arbin
-    Public Sub Convert(ByVal files As List(Of IO.FileInfo), outputpath As String)
-        Dim ds As New DataSet
-        Dim outputdir As New IO.DirectoryInfo(outputpath)
-        Dim timeperfile As New Stopwatch
-        Dim xlsApp As Excel.Application = Nothing
-        Dim xlsWorkBooks As Excel.Workbooks = Nothing
-        Dim xlsWB As Excel.Workbook = Nothing
 
-        For Each file In files
-            timeperfile = Stopwatch.StartNew()
-            DataImportForm.WriteLine("Pulling tables for " & file.Name & ".")
-
-            ds = GetDataSet(file)
-
-            DataImportForm.WriteLine("Exporting to Excel.")
-            If Export.ToExcel(ds, outputpath & "\" & IO.Path.GetFileNameWithoutExtension(file.Name) & ".xlsx") Then
-                Try
-                    xlsApp = New Excel.Application
-                    xlsApp.Visible = False
-                    xlsWorkBooks = xlsApp.Workbooks
-                    xlsWB = xlsWorkBooks.Open(outputpath & "\" & IO.Path.GetFileNameWithoutExtension(file.Name) & ".xlsx")
-
-                    ArbinFormatMain(xlsWB)
-                    xlsWB.Save()
-
-                Catch ex As Exception
-                    MessageBox.Show(String.Format("Error: {0}", ex.Message))
-
-                Finally
-                    xlsWB.Close()
-                    xlsWB = Nothing
-                    xlsApp.Quit()
-                    xlsApp = Nothing
-                End Try
-
-                DataImportForm.WriteLine(String.Format("{0} was successfully converted in {1} s!", file.Name, timeperfile.ElapsedMilliseconds / 1000))
-            End If
-        Next
-    End Sub
-
-    Private Function GetDataSet(ByVal file As IO.FileInfo) As DataSet
+    Public Function GetDataSet(ByVal file As IO.FileInfo) As DataSet
         Dim ds As New DataSet
         Dim Tables As New Dictionary(Of String, Dictionary(Of String, Type))
         Dim normalcols As New Dictionary(Of String, Type)
@@ -317,45 +361,7 @@ Module Arbin
 End Module
 
 Module EIS
-    Public Sub EISConvert(ByVal files As List(Of IO.FileInfo), outputpath As String)
-        Dim ds As New DataSet
-        Dim outputdir As New IO.DirectoryInfo(outputpath)
-        Dim timeperfile As New Stopwatch
-        Dim xlsApp As Excel.Application = Nothing
-        Dim xlsWorkBooks As Excel.Workbooks = Nothing
-        Dim xlsWB As Excel.Workbook = Nothing
-
-        For Each file In files
-            timeperfile = Stopwatch.StartNew()
-            DataImportForm.WriteLine("Pulling tables for " & file.Name & ".")
-
-            ds = EISGetDataSet(file)
-
-            DataImportForm.WriteLine("Exporting to Excel.")
-            If Export.ToExcel(ds, outputpath & "\" & IO.Path.GetFileNameWithoutExtension(file.Name) & "_EIS.xlsx") Then
-                Try
-                    xlsApp = New Excel.Application
-                    xlsApp.Visible = False
-                    xlsWorkBooks = xlsApp.Workbooks
-                    xlsWB = xlsWorkBooks.Open(outputpath & "\" & IO.Path.GetFileNameWithoutExtension(file.Name) & "_EIS.xlsx")
-
-                    EISFormatMain(xlsWB)
-                    xlsWB.Save()
-
-                Catch ex As Exception
-                    MessageBox.Show(String.Format("Error: {0}", ex.Message))
-
-                Finally
-                    xlsWB.Close()
-                    xlsWB = Nothing
-                    xlsApp.Quit()
-                    xlsApp = Nothing
-                End Try
-                DataImportForm.WriteLine(String.Format("{0} was successfully converted in {1} s!", file.Name, timeperfile.ElapsedMilliseconds / 1000))
-            End If
-        Next
-    End Sub
-    Private Function EISGetDataSet(ByVal file As IO.FileInfo) As DataSet
+    Public Function EISGetDataSet(ByVal file As IO.FileInfo) As DataSet
         Dim ds As New DataSet
         Dim Tables As New Dictionary(Of String, Dictionary(Of String, Type))
         Dim cols As New Dictionary(Of String, Type)
@@ -395,7 +401,7 @@ Module EIS
         Return ds
     End Function
 
-    Private Function EISFillDataSet(ByVal file As FileInfo, ByRef ds As DataSet)
+    Public Function EISFillDataSet(ByVal file As FileInfo, ByRef ds As DataSet)
 
         Using MyReader As New Microsoft.VisualBasic.
                     FileIO.TextFieldParser(
@@ -765,7 +771,7 @@ Module Export
             Try
                 pck.SaveAs(file)
             Catch
-                DataImportForm.WriteLine(String.Format("Error saving file: {0}.", file.Name))
+                DataImportForm.BackgroundWorker1.ReportProgress(0, New String(String.Format("Error saving file: {0}.", file.Name)))
                 Return False
             End Try
         End Using
